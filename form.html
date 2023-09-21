@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Local Storage Expense Tracker</title>
+    <style>
+        form div {
+            display: inline-block;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Expense Tracker</h1>
+
+    <form id="addExpenseForm">
+        <div>
+            <label for="expenseAmount">Expense Amount:</label>
+            <input type="number" id="expenseAmount" required>
+        </div>
+        <div>
+            <label for="description">Description:</label>
+            <input type="text" id="description" required>
+        </div>
+        <div>
+            <label for="category">Category:</label>
+            <select id="category" required>
+                <option value="Movie">Movie</option>
+                <option value="Petrol">Petrol</option>
+                <option value="Food">Food</option>
+                <option value="Study">Study</option>
+            </select>
+        </div>
+        <div>
+            <button type="submit">Add Expense</button>
+        </div>
+    </form>
+
+    <ul id="expenseList"></ul>
+
+    <script>
+        function addExpenseToLocalStorage(expenseAmount, description, category) {
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+            expenses.push({ amount: expenseAmount, description, category });
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+        }
+
+        function displayExpensesFromLocalStorage() {
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+            const expenseList = document.getElementById('expenseList');
+
+            expenseList.innerHTML = '';
+
+            expenses.forEach((expense, index) => {
+                const li = document.createElement('li');
+                li.textContent = `Amount: $${expense.amount}, Description: ${expense.description}, Category: ${expense.category}`;
+
+                const deleteButton = document.createElement('button');
+                deleteButton.textContent = 'Delete';
+                deleteButton.addEventListener('click', () => deleteExpenseFromLocalStorage(index));
+
+                const editButton = document.createElement('button');
+                editButton.textContent = 'Edit';
+                editButton.addEventListener('click', () => editExpenseInLocalStorage(index, expense));
+
+                li.appendChild(deleteButton);
+                li.appendChild(editButton);
+                expenseList.appendChild(li);
+            });
+        }
+
+        function deleteExpenseFromLocalStorage(index) {
+            let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+            expenses.splice(index, 1);
+            localStorage.setItem('expenses', JSON.stringify(expenses));
+            displayExpensesFromLocalStorage();
+        }
+
+        function editExpenseInLocalStorage(index, existingExpense) {
+            const updatedAmount = prompt('Edit Expense Amount:', existingExpense.amount);
+            const updatedDescription = prompt('Edit Description:', existingExpense.description);
+            const updatedCategory = prompt('Edit Category:', existingExpense.category);
+
+            if (updatedAmount !== null && updatedDescription !== null && updatedCategory !== null) {
+                let expenses = JSON.parse(localStorage.getItem('expenses')) || [];
+                expenses[index] = { amount: updatedAmount, description: updatedDescription, category: updatedCategory };
+                localStorage.setItem('expenses', JSON.stringify(expenses));
+                displayExpensesFromLocalStorage();
+            }
+        }
+
+        const addExpenseForm = document.getElementById('addExpenseForm');
+        addExpenseForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const expenseAmount = document.getElementById('expenseAmount').value;
+            const description = document.getElementById('description').value;
+            const category = document.getElementById('category').value;
+
+            addExpenseToLocalStorage(expenseAmount, description, category);
+            displayExpensesFromLocalStorage();
+            addExpenseForm.reset();
+        });
+
+        displayExpensesFromLocalStorage();
+    </script>
+</body>
+</html>
